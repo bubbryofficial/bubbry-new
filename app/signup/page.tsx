@@ -27,10 +27,17 @@ export default function Signup() {
     }
 
     if (data.user) {
-      await supabase.from("profiles").insert({
-        id: data.user.id,
-        role: role,
-      });
+        const { error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+          id: data.user.id,
+          role: role,
+        });
+      
+      if (profileError) {
+        alert("Profile insert error: " + profileError.message);
+        return;
+      }
 
       alert("Account created successfully!");
       router.push("/login");
