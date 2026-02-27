@@ -18,8 +18,17 @@ export default function CustomerDashboard() {
 
   async function fetchProducts() {
     const { data } = await supabase
-      .from("products")
-      .select("*");
+    .from("products")
+    .select(`
+      id,
+      name,
+      price,
+      stock,
+      shop_id,
+      profiles (
+        name
+      )
+    `);
 
     if (data) setProducts(data);
   }
@@ -39,13 +48,14 @@ export default function CustomerDashboard() {
         style={{ marginBottom: "20px" }}
       />
 
-      {filteredProducts.map((product) => (
-        <div key={product.id} style={{ marginBottom: "15px" }}>
-          <strong>{product.name}</strong>
-          <div>Price: ₹{product.price}</div>
-          <div>Stock: {product.stock}</div>
-        </div>
-      ))}
+{filteredProducts.map((product) => (
+  <div key={product.id} style={{ marginBottom: "20px", borderBottom: "1px solid #ccc", paddingBottom: "10px" }}>
+    <strong>{product.name}</strong>
+    <div>Shop: {product.profiles?.name}</div>
+    <div>Price: ₹{product.price}</div>
+    <div>Stock: {product.stock}</div>
+  </div>
+))}
     </div>
   );
 }
