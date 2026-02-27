@@ -13,17 +13,26 @@ export default function Signup() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("customer");
 
   const handleSignup = async () => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (error) {
       alert(error.message);
-    } else {
-      alert("Account created! Please login.");
+      return;
+    }
+
+    if (data.user) {
+      await supabase.from("profiles").insert({
+        id: data.user.id,
+        role: role,
+      });
+
+      alert("Account created successfully!");
       router.push("/login");
     }
   };
@@ -42,9 +51,18 @@ export default function Signup() {
       <input
         type="password"
         placeholder="Password"
-        className="border p-3 mb-4 w-80"
+        className="border p-3 mb-3 w-80"
         onChange={(e) => setPassword(e.target.value)}
       />
+
+      <select
+        className="border p-3 mb-4 w-80"
+        value={role}
+        onChange={(e) => setRole(e.target.value)}
+      >
+        <option value="customer">Customer</option>
+        <option value="shopkeeper">Shopkeeper</option>
+      </select>
 
       <button
         onClick={handleSignup}
