@@ -15,15 +15,33 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
       alert(error.message);
+      return;
+    }
+
+    const user = data?.user;
+
+    if (!user) {
+      alert("Login failed: user not found.");
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role === "shopkeeper") {
+      router.push("/shop-dashboard");
     } else {
-      router.push("/dashboard");
+      router.push("/customer-dashboard");
     }
   };
 
