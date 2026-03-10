@@ -172,7 +172,7 @@ export default function MyOrders() {
             <div key={order.id} className="order-card">
               <div className="order-header">
                 <div className="order-id">#{order.id.slice(0, 8).toUpperCase()}</div>
-                <div style={{ display: "flex", align: "center", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span className={`status-pill ${statusPillClass(order.status ?? "pending")}`}>
                     {(order.status ?? "pending").charAt(0).toUpperCase() + (order.status ?? "pending").slice(1)}
                   </span>
