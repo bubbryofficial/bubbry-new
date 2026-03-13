@@ -295,20 +295,33 @@ export default function ShopDashboard() {
     let productSize = size.trim();
 
     if (!productId) {
+      // Try fuzzy match in master_products
       const { data: masterData } = await supabase
         .from("master_products")
         .select("id, name, size")
-        .ilike("name", name.trim())
+        .ilike("name", "%" + name.trim() + "%")
         .limit(1)
-        .single();
-      if (!masterData) {
-        alert("Product not found in catalog. Please select from autocomplete suggestions.");
-        setLoading(false);
-        return;
+        .maybeSingle();
+
+      if (masterData) {
+        productId = masterData.id;
+        productName = masterData.name ?? productName;
+        productSize = masterData.size ?? productSize;
+      } else {
+        // Product came from barcode scan (Open Food Facts) — insert into master_products first
+        const { data: newMaster, error: insertError } = await supabase
+          .from("master_products")
+          .insert({ name: productName, size: productSize, barcode: scannedBarcode || null })
+          .select("id")
+          .single();
+
+        if (insertError || !newMaster) {
+          alert("Could not save product to catalog: " + (insertError?.message ?? "unknown error"));
+          setLoading(false);
+          return;
+        }
+        productId = newMaster.id;
       }
-      productId = masterData.id;
-      productName = masterData.name ?? productName;
-      productSize = masterData.size ?? productSize;
     }
 
     const { error } = await supabase.from("shop_products").upsert({
@@ -497,7 +510,6 @@ export default function ShopDashboard() {
       <nav className="bottom-nav">
         <a href="/shop-dashboard" className="nav-item active"><div className="nav-icon">🏠</div>Home</a>
         <a href="/add-product" className="nav-item"><div className="nav-icon">➕</div>Add</a>
-        <a href="/inventory" className="nav-item"><div className="nav-icon">📦</div>Inventory</a>
         <a href="/shop-orders" className="nav-item"><div className="nav-icon">📋</div>Orders</a>
       </nav>
     </div>
