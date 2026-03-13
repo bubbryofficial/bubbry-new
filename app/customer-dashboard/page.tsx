@@ -595,7 +595,8 @@ export default function CustomerDashboard() {
             <div className="sheet-actions">
               <button className="btn-clear" onClick={() => {
                 setFShop(""); setFBrand(""); setFMinPrice(""); setFMaxPrice(""); setFInStock(false);
-                setApplied({ minPrice:"", maxPrice:"", shop:"", brand:"", inStock:false });
+                setApplied({ minPrice:"", maxPrice:"", shop:"", brand:"", inStock:true, orderType:"" });
+                setFOrderType("");
                 setShowFilter(false);
               }}>Clear All</button>
               <button className="btn-apply" onClick={() => {
