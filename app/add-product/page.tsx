@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -26,20 +26,31 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F4F6FB; }
 
 .product-row { background: white; border-radius: 14px; border: 1.5px solid #E4EAFF; padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(26,107,255,0.05); }
 .product-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.product-img { width: 54px; height: 54px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #EBF1FF; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; }
+.product-img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #EBF1FF; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; }
+.product-img img { width: 100%; height: 100%; object-fit: cover; }
 .product-details { flex: 1; }
 .product-name { font-size: 14px; font-weight: 800; color: #0D1B3E; margin-bottom: 3px; line-height: 1.3; }
-.product-cat { font-size: 11px; color: #8A96B5; font-weight: 600; padding: 2px 8px; background: #EBF1FF; color: #1A6BFF; border-radius: 20px; display: inline-block; }
+.product-cat { font-size: 11px; color: #1A6BFF; font-weight: 700; padding: 2px 8px; background: #EBF1FF; border-radius: 20px; display: inline-block; }
 .product-size { font-size: 12px; color: #8A96B5; font-weight: 600; margin-top: 3px; }
+
+/* IMAGE UPLOAD */
+.img-upload-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding: 10px; background: #F4F6FB; border-radius: 10px; border: 1.5px solid #E4EAFF; cursor: pointer; transition: border-color 0.2s; }
+.img-upload-row:hover { border-color: #1A6BFF; }
+.img-upload-row.locked { cursor: default; background: #E6FAF4; border-color: #00B37E; }
+.img-thumb { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; background: #DDEAFF; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; }
+.img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.img-upload-text { font-size: 12px; font-weight: 700; color: #4A5880; flex: 1; }
+.img-upload-sub { font-size: 10px; color: #8A96B5; font-weight: 500; margin-top: 2px; }
+.img-exists-label { font-size: 12px; font-weight: 700; color: #00875A; flex: 1; }
 
 .input-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end; }
 .mini-field { }
 .mini-label { font-size: 10px; font-weight: 800; color: #8A96B5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
 .mini-input { width: 100%; padding: 10px 12px; border: 2px solid #E4EAFF; border-radius: 10px; font-size: 14px; font-weight: 600; color: #0D1B3E; background: #F4F6FB; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; transition: all 0.2s; }
 .mini-input:focus { border-color: #1A6BFF; background: white; }
-.add-btn { padding: 10px 16px; background: #1A6BFF; color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s; white-space: nowrap; }
-.add-btn:hover { background: #1255CC; }
+.add-btn { padding: 10px 16px; background: #1A6BFF; color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; transition: all 0.2s; }
 .add-btn.added { background: #00B37E; }
+.add-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .loading-state { text-align: center; padding: 40px 24px; color: #8A96B5; font-weight: 600; }
 .empty-state { text-align: center; padding: 60px 24px; }
@@ -60,6 +71,10 @@ export default function AddProduct() {
   const [priceMap, setPriceMap] = useState<Record<string, string>>({});
   const [stockMap, setStockMap] = useState<Record<string, string>>({});
   const [addedMap, setAddedMap] = useState<Record<string, boolean>>({});
+  const [uploadingMap, setUploadingMap] = useState<Record<string, boolean>>({});
+  const [imgFileMap, setImgFileMap] = useState<Record<string, File>>({});
+  const [imgPreviewMap, setImgPreviewMap] = useState<Record<string, string>>({});
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     const timer = setTimeout(fetchProducts, 300);
@@ -72,18 +87,52 @@ export default function AddProduct() {
     if (search.trim()) {
       query = supabase.from("master_products").select("*").ilike("name", `%${search}%`).limit(50);
     }
-    const { data, error } = await query;
-    if (error) console.log(error);
+    const { data } = await query;
     setProducts(data || []);
     setLoading(false);
+  }
+
+  function handleImgSelect(productId: string, e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImgFileMap((p) => ({ ...p, [productId]: file }));
+    const reader = new FileReader();
+    reader.onload = () => setImgPreviewMap((p) => ({ ...p, [productId]: reader.result as string }));
+    reader.readAsDataURL(file);
+  }
+
+  async function uploadImage(file: File, productId: string): Promise<string> {
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `products/${productId}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file, { upsert: true });
+    if (error) throw new Error(error.message);
+    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+    return data.publicUrl;
   }
 
   async function addProduct(product: any) {
     const price = priceMap[product.id];
     const stock = stockMap[product.id];
     if (!price || !stock) { alert("Enter price and stock"); return; }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert("Login first"); return; }
+
+    // Upload image if selected and product has no image
+    const imgFile = imgFileMap[product.id];
+    if (imgFile && !product.image_url) {
+      setUploadingMap((p) => ({ ...p, [product.id]: true }));
+      try {
+        const publicUrl = await uploadImage(imgFile, product.id);
+        await supabase.from("master_products").update({ image_url: publicUrl }).eq("id", product.id);
+        // Update local product list
+        setProducts((prev) => prev.map((p) => p.id === product.id ? { ...p, image_url: publicUrl } : p));
+      } catch (err) {
+        console.error("Upload failed");
+      }
+      setUploadingMap((p) => ({ ...p, [product.id]: false }));
+    }
+
     const { error } = await supabase.from("shop_products").upsert({
       shop_id: user.id,
       product_id: product.id,
@@ -93,6 +142,7 @@ export default function AddProduct() {
       size: product.size ?? "",
     });
     if (error) { alert(error.message); return; }
+
     setAddedMap((p) => ({ ...p, [product.id]: true }));
     setTimeout(() => setAddedMap((p) => ({ ...p, [product.id]: false })), 2500);
     setPriceMap((p) => ({ ...p, [product.id]: "" }));
@@ -126,52 +176,77 @@ export default function AddProduct() {
         ) : (
           <>
             <div className="results-label">{products.length} products found</div>
-            {products.map((product) => (
-              <div key={product.id} className="product-row">
-                <div className="product-top">
-                  <div className="product-img">
-                    {product.image_url ? (
-                      <img src={product.image_url} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : "🛍️"}
+            {products.map((product) => {
+              const previewUrl = imgPreviewMap[product.id] || product.image_url || "";
+              const hasExistingImg = !!product.image_url;
+              const isUploading = uploadingMap[product.id];
+
+              return (
+                <div key={product.id} className="product-row">
+                  <div className="product-top">
+                    <div className="product-img">
+                      {previewUrl
+                        ? <img src={previewUrl} alt={product.name} />
+                        : "🛍️"}
+                    </div>
+                    <div className="product-details">
+                      <div className="product-name">{product.name ?? "Unnamed"}</div>
+                      {product.size && <div className="product-size">{product.size}</div>}
+                      {product.category && <span className="product-cat">{product.category}</span>}
+                    </div>
                   </div>
-                  <div className="product-details">
-                    <div className="product-name">{product.name ?? "Unnamed"}</div>
-                    {product.size && <div className="product-size">{product.size}</div>}
-                    {product.category && <span className="product-cat">{product.category}</span>}
-                  </div>
-                </div>
-                <div className="input-row">
-                  <div className="mini-field">
-                    <div className="mini-label">Price (₹)</div>
-                    <input
-                      className="mini-input"
-                      placeholder="0.00"
-                      type="number"
-                      min="0"
-                      value={priceMap[product.id] ?? ""}
-                      onChange={(e) => setPriceMap((p) => ({ ...p, [product.id]: e.target.value }))}
-                    />
-                  </div>
-                  <div className="mini-field">
-                    <div className="mini-label">Stock</div>
-                    <input
-                      className="mini-input"
-                      placeholder="0"
-                      type="number"
-                      min="0"
-                      value={stockMap[product.id] ?? ""}
-                      onChange={(e) => setStockMap((p) => ({ ...p, [product.id]: e.target.value }))}
-                    />
-                  </div>
-                  <button
-                    className={`add-btn ${addedMap[product.id] ? "added" : ""}`}
-                    onClick={() => addProduct(product)}
+
+                  {/* Image upload */}
+                  <div
+                    className={`img-upload-row ${hasExistingImg ? "locked" : ""}`}
+                    onClick={() => { if (!hasExistingImg) fileInputRefs.current[product.id]?.click(); }}
                   >
-                    {addedMap[product.id] ? "✓ Added" : "+ Add"}
-                  </button>
+                    <div className="img-thumb">
+                      {previewUrl ? <img src={previewUrl} alt="" /> : "📷"}
+                    </div>
+                    {hasExistingImg ? (
+                      <div className="img-exists-label">✅ Photo saved — shared with all shopkeepers</div>
+                    ) : imgFileMap[product.id] ? (
+                      <div>
+                        <div className="img-upload-text">📷 Photo selected</div>
+                        <div className="img-upload-sub">Will upload when you add to inventory</div>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="img-upload-text">📷 Add product photo</div>
+                        <div className="img-upload-sub">Saves for all shopkeepers</div>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    ref={(el) => { fileInputRefs.current[product.id] = el; }}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    style={{ display: "none" }}
+                    onChange={(e) => handleImgSelect(product.id, e)}
+                  />
+
+                  <div className="input-row">
+                    <div className="mini-field">
+                      <div className="mini-label">Price (₹)</div>
+                      <input className="mini-input" placeholder="0.00" type="number" min="0" value={priceMap[product.id] ?? ""} onChange={(e) => setPriceMap((p) => ({ ...p, [product.id]: e.target.value }))} />
+                    </div>
+                    <div className="mini-field">
+                      <div className="mini-label">Stock</div>
+                      <input className="mini-input" placeholder="0" type="number" min="0" value={stockMap[product.id] ?? ""} onChange={(e) => setStockMap((p) => ({ ...p, [product.id]: e.target.value }))} />
+                    </div>
+                    <button
+                      className={`add-btn ${addedMap[product.id] ? "added" : ""}`}
+                      onClick={() => addProduct(product)}
+                      disabled={isUploading}
+                    >
+                      {isUploading ? "⏳" : addedMap[product.id] ? "✓ Added" : "+ Add"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </>
         )}
       </div>
@@ -179,7 +254,6 @@ export default function AddProduct() {
       <nav className="bottom-nav">
         <a href="/shop-dashboard" className="nav-item"><div className="nav-icon">🏠</div>Home</a>
         <a href="/add-product" className="nav-item active"><div className="nav-icon">➕</div>Add</a>
-        <a href="/inventory" className="nav-item"><div className="nav-icon">📦</div>Inventory</a>
         <a href="/shop-orders" className="nav-item"><div className="nav-icon">📋</div>Orders</a>
       </nav>
     </div>
