@@ -140,7 +140,7 @@ export default function AddProduct() {
       stock: Number(stock),
       name: product.name ?? "",
       size: product.size ?? "",
-    });
+    }, { onConflict: "shop_id,product_id" });
     if (error) { alert(error.message); return; }
 
     setAddedMap((p) => ({ ...p, [product.id]: true }));

@@ -560,7 +560,7 @@ export default function ShopDashboard() {
       stock: Number(stock),
       name: productName,
       size: productSize,
-    });
+    }, { onConflict: "shop_id,product_id" });
 
     if (error) { alert(error.message); setLoading(false); return; }
 
