@@ -96,6 +96,26 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F4F6FB; }
 .empty-title { font-size: 16px; font-weight: 800; color: #0D1B3E; margin-bottom: 4px; }
 .empty-sub { font-size: 13px; color: #8A96B5; }
 
+.live-bar { background: rgba(0,0,0,0.18); border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 10px; }
+.live-toggle-row { display: flex; align-items: center; justify-content: space-between; }
+.live-toggle-label { display: flex; align-items: center; gap: 8px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+.live-dot.on { background: #4ade80; box-shadow: 0 0 6px #4ade80; animation: pulse-dot 1.5s infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.live-label-text { font-size: 14px; font-weight: 800; color: rgba(255,255,255,0.9); }
+.live-label-sub { font-size: 10px; color: rgba(255,255,255,0.6); font-weight: 600; }
+.toggle-switch { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-track { position: absolute; inset: 0; background: rgba(255,255,255,0.2); border-radius: 26px; cursor: pointer; transition: background 0.25s; }
+.toggle-track.on { background: #4ade80; }
+.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+.toggle-thumb.on { transform: translateX(22px); }
+.delivery-row { display: flex; gap: 8px; }
+.delivery-chip { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s; }
+.delivery-chip.on { background: rgba(255,255,255,0.95); color: #1A6BFF; border-color: white; }
+.delivery-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+.offline-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.6); backdrop-filter: blur(2px); z-index: 10; display: flex; align-items: center; justify-content: center; border-radius: 16px; pointer-events: none; }
+.offline-overlay-text { font-size: 13px; font-weight: 800; color: #8A96B5; }
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; border-top: 1.5px solid #E4EAFF; display: flex; align-items: center; box-shadow: 0 -4px 20px rgba(26,107,255,0.07); z-index: 100; }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0; text-decoration: none; color: #B0BACC; font-size: 10px; font-weight: 700; transition: color 0.15s; }
 .nav-item.active { color: #1A6BFF; }
@@ -112,6 +132,36 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F4F6FB; }
 .manual-barcode-row { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
 .manual-barcode-row .field-input { margin: 0; }
 .barcode-tag { display: inline-flex; align-items: center; gap: 6px; background: #EBF1FF; border: 1.5px solid #1A6BFF; border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 700; color: #1A6BFF; font-family: monospace; }
+
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 260px; overflow-y: auto; padding: 2px; }
+.cat-grid::-webkit-scrollbar { width: 4px; }
+.cat-grid::-webkit-scrollbar-thumb { background: #E4EAFF; border-radius: 4px; }
+.cat-option { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 2px solid #E4EAFF; border-radius: 10px; cursor: pointer; background: white; transition: all 0.15s; font-family: 'Plus Jakarta Sans', sans-serif; }
+.cat-option:hover { border-color: #1A6BFF; background: #EBF1FF; }
+.cat-option.selected { border-color: #1A6BFF; background: #EBF1FF; }
+.cat-option-icon { font-size: 20px; flex-shrink: 0; }
+.cat-option-name { font-size: 11px; font-weight: 700; color: #0D1B3E; line-height: 1.3; }
+.new-product-notice { display: flex; align-items: center; gap: 8px; background: #EBF1FF; border: 1.5px solid #1A6BFF; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; font-weight: 700; color: #1A6BFF; }
+
+.existing-stock-banner { background: #FFF8E6; border: 1.5px solid #FFB800; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.existing-stock-banner-icon { font-size: 22px; flex-shrink: 0; }
+.existing-stock-banner-text { flex: 1; }
+.existing-stock-banner-title { font-size: 13px; font-weight: 800; color: #946200; margin-bottom: 2px; }
+.existing-stock-banner-sub { font-size: 11px; color: #B07A00; font-weight: 600; }
+.existing-stock-banner-btn { padding: 7px 12px; background: #FFB800; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; flex-shrink: 0; }
+
+.stock-ctrl-row { display: flex; align-items: center; gap: 8px; }
+.stock-ctrl-btn { width: 34px; height: 34px; border: none; border-radius: 8px; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.15s; flex-shrink: 0; }
+.stock-ctrl-btn.minus { background: #FFF0F0; color: #F03D3D; }
+.stock-ctrl-btn.minus:hover { background: #FFD6D6; }
+.stock-ctrl-btn.plus { background: #E6FAF4; color: #00875A; }
+.stock-ctrl-btn.plus:hover { background: #C6F0E0; }
+.stock-ctrl-input { flex: 1; padding: 8px 10px; border: 2px solid #E4EAFF; border-radius: 8px; font-size: 15px; font-weight: 800; color: #0D1B3E; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; outline: none; background: #F4F6FB; }
+.stock-ctrl-input:focus { border-color: #1A6BFF; background: white; }
+.stock-save-btn { padding: 8px 14px; background: #1A6BFF; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; flex-shrink: 0; transition: all 0.15s; }
+.stock-save-btn:hover { background: #1255CC; }
+.stock-save-btn.saved { background: #00B37E; }
+.stock-delta-hint { font-size: 10px; font-weight: 700; margin-top: 4px; text-align: center; }
 `;
 
 export default function ShopDashboard() {
@@ -135,13 +185,71 @@ export default function ShopDashboard() {
   const [imgPreview, setImgPreview] = useState<string>("");
   const [existingImgUrl, setExistingImgUrl] = useState<string>("");
   const [uploadingImg, setUploadingImg] = useState(false);
+  const [isLive, setIsLive] = useState(false);
+  const [offersDelivery, setOffersDelivery] = useState(false);
+  const [offersPickup, setOffersPickup] = useState(true);
+  const [togglingLive, setTogglingLive] = useState(false);
+  // Category
+  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isNewProduct, setIsNewProduct] = useState(false);
+  // Existing stock detection
+  const [existingShopProduct, setExistingShopProduct] = useState<any>(null);
+  // Inline stock editing per product card
+  const [editStockMap, setEditStockMap] = useState<Record<string, string>>({});
+  const [savedStockMap, setSavedStockMap] = useState<Record<string, boolean>>({});
   const imgInputRef = useRef<HTMLInputElement>(null);
   const suggestionDebounce = useRef<any>(null);
 
   useEffect(() => {
     saveShopLocation();
     fetchProducts();
+    fetchCategories();
+    loadShopStatus();
   }, []);
+
+  async function loadShopStatus() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("is_live, offers_delivery, offers_pickup")
+      .eq("id", user.id)
+      .single();
+    if (data) {
+      setIsLive(data.is_live ?? false);
+      setOffersDelivery(data.offers_delivery ?? false);
+      setOffersPickup(data.offers_pickup ?? true);
+    }
+  }
+
+  async function toggleLive(val: boolean) {
+    setTogglingLive(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setTogglingLive(false); return; }
+    await supabase.from("profiles").update({ is_live: val }).eq("id", user.id);
+    setIsLive(val);
+    setTogglingLive(false);
+  }
+
+  async function toggleDelivery(val: boolean) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("profiles").update({ offers_delivery: val }).eq("id", user.id);
+    setOffersDelivery(val);
+  }
+
+  async function togglePickup(val: boolean) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("profiles").update({ offers_pickup: val }).eq("id", user.id);
+    setOffersPickup(val);
+  }
+
+  async function fetchCategories() {
+    const { data } = await supabase.from("categories").select("name").order("sort_order", { ascending: true });
+    if (data) setCategories(data);
+  }
 
   // When a product is selected, check if it already has an image
   useEffect(() => {
@@ -171,6 +279,11 @@ export default function ShopDashboard() {
 
   async function searchByBarcode(barcode: string) {
     setScanStatus("searching");
+    setExistingShopProduct(null);
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // 1. Check master_products
     const { data } = await supabase
       .from("master_products")
       .select("*")
@@ -181,12 +294,31 @@ export default function ShopDashboard() {
       setName(data.name);
       setSize(data.size ?? "");
       setSelectedProductId(data.id);
+
+      // Check if shopkeeper already has this in their inventory
+      if (user) {
+        const { data: sp } = await supabase
+          .from("shop_products")
+          .select("id, stock, price, name, size")
+          .eq("shop_id", user.id)
+          .eq("product_id", data.id)
+          .single();
+        if (sp) {
+          setExistingShopProduct(sp);
+          setPrice(String(sp.price ?? ""));
+          setStock(String(sp.stock ?? ""));
+          setScanStatus("found");
+          setTimeout(() => setScanStatus("idle"), 4000);
+          return;
+        }
+      }
+
       setScanStatus("found");
       setTimeout(() => setScanStatus("idle"), 4000);
       return;
     }
 
-    // Fallback: Open Food Facts
+    // 2. Fallback: Open Food Facts
     try {
       const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
       const json = await res.json();
@@ -202,6 +334,7 @@ export default function ShopDashboard() {
       }
     } catch (e) {}
 
+    setIsNewProduct(true);
     setScanStatus("notfound");
     setTimeout(() => setScanStatus("idle"), 5000);
   }
@@ -220,14 +353,21 @@ export default function ShopDashboard() {
   function handleNameChange(val: string) {
     setName(val);
     setSelectedProductId(null);
+    setIsNewProduct(false);
+    setCategory("");
     clearTimeout(suggestionDebounce.current);
-    suggestionDebounce.current = setTimeout(() => fetchSuggestions(val), 250);
+    suggestionDebounce.current = setTimeout(async () => {
+      await fetchSuggestions(val);
+      // After suggestions load, check if val matches nothing → likely new product
+    }, 250);
   }
 
   function selectSuggestion(item: any) {
     setName(item.name ?? "");
     setSize(item.size ?? "");
     setSelectedProductId(item.id ?? null);
+    setIsNewProduct(false);
+    setCategory("");
     setSuggestions([]);
     setShowSuggestions(false);
   }
@@ -282,6 +422,19 @@ export default function ShopDashboard() {
     })));
   }
 
+  async function updateStockInline(productId: string, newStock: number) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase
+      .from("shop_products")
+      .update({ stock: newStock })
+      .eq("id", productId)
+      .eq("shop_id", user.id);
+    setProducts((prev) => prev.map((p) => p.id === productId ? { ...p, stock: newStock } : p));
+    setSavedStockMap((prev) => ({ ...prev, [productId]: true }));
+    setTimeout(() => setSavedStockMap((prev) => ({ ...prev, [productId]: false })), 2000);
+  }
+
   async function deleteProduct(id: string) {
     if (!confirm("Remove this product from your inventory?")) return;
     const { data: { user } } = await supabase.auth.getUser();
@@ -318,7 +471,7 @@ export default function ShopDashboard() {
         // Insert new into master_products
         const { data: newMaster, error: insertError } = await supabase
           .from("master_products")
-          .insert({ name: productName, size: productSize, barcode: barcodeToSave })
+          .insert({ name: productName, size: productSize, barcode: barcodeToSave, category: category || null })
           .select("id")
           .single();
         if (insertError || !newMaster) {
@@ -363,7 +516,8 @@ export default function ShopDashboard() {
 
     setName(""); setPrice(""); setStock(""); setSize("");
     setScannedBarcode(""); setManualBarcode(""); setSelectedProductId(null);
-    setImgFile(null); setImgPreview(""); setExistingImgUrl("");
+    setImgFile(null); setImgPreview(""); setExistingImgUrl(""); setExistingShopProduct(null);
+    setCategory(""); setIsNewProduct(false);
     setLoading(false); setAddSuccess(true);
     setTimeout(() => setAddSuccess(false), 3000);
     fetchProducts();
@@ -383,7 +537,7 @@ export default function ShopDashboard() {
           <div className="brand">🫧 My Store</div>
           <a href="/shop-orders" className="orders-link">📋 Orders</a>
         </div>
-        <div className="stats-row">
+        <div className="stats-row" style={{marginBottom:12}}>
           <div className="stat-chip">
             <div className="stat-val">{products.length}</div>
             <div className="stat-lbl">Products</div>
@@ -395,6 +549,40 @@ export default function ShopDashboard() {
           <div className="stat-chip">
             <div className="stat-val" style={{ color: lowStock > 0 ? "#FFB800" : "white" }}>{lowStock}</div>
             <div className="stat-lbl">Low Stock</div>
+          </div>
+        </div>
+
+        {/* Live bar */}
+        <div className="live-bar">
+          <div className="live-toggle-row">
+            <div className="live-toggle-label">
+              <div className={`live-dot ${isLive ? "on" : ""}`} />
+              <div>
+                <div className="live-label-text">{isLive ? "🟢 Shop is Live" : "⚫ Shop is Offline"}</div>
+                <div className="live-label-sub">{isLive ? "Customers can see your products" : "Tap to go live and start receiving orders"}</div>
+              </div>
+            </div>
+            <label className="toggle-switch" onClick={() => !togglingLive && toggleLive(!isLive)}>
+              <div className={`toggle-track ${isLive ? "on" : ""}`}>
+                <div className={`toggle-thumb ${isLive ? "on" : ""}`} />
+              </div>
+            </label>
+          </div>
+          <div className="delivery-row">
+            <button
+              className={`delivery-chip ${offersPickup ? "on" : ""}`}
+              onClick={() => togglePickup(!offersPickup)}
+              disabled={!isLive}
+            >
+              🏪 {offersPickup ? "Pickup: ON" : "Pickup: OFF"}
+            </button>
+            <button
+              className={`delivery-chip ${offersDelivery ? "on" : ""}`}
+              onClick={() => toggleDelivery(!offersDelivery)}
+              disabled={!isLive}
+            >
+              🛵 {offersDelivery ? "Delivery: ON" : "Delivery: OFF"}
+            </button>
           </div>
         </div>
       </div>
@@ -477,8 +665,26 @@ export default function ShopDashboard() {
 
               {/* Status toasts */}
               {scanStatus === "searching" && <div className="toast toast-info">🔍 Looking up product...</div>}
-              {scanStatus === "found" && <div className="toast toast-success">🎉 Product found automatically!</div>}
+              {scanStatus === "found" && !existingShopProduct && <div className="toast toast-success">🎉 Product found automatically!</div>}
               {scanStatus === "notfound" && <div className="toast toast-warn">⚠️ Not found — please type the name below</div>}
+
+              {/* Existing stock banner */}
+              {existingShopProduct && (
+                <div className="existing-stock-banner">
+                  <div className="existing-stock-banner-icon">📦</div>
+                  <div className="existing-stock-banner-text">
+                    <div className="existing-stock-banner-title">You already have this product!</div>
+                    <div className="existing-stock-banner-sub">Current stock: {existingShopProduct.stock} · Price: ₹{existingShopProduct.price}</div>
+                  </div>
+                  <button
+                    type="button"
+                    className="existing-stock-banner-btn"
+                    onClick={() => { setActiveTab("inventory"); setSearchQuery(existingShopProduct.name ?? ""); setExistingShopProduct(null); }}
+                  >
+                    Edit Stock
+                  </button>
+                </div>
+              )}
 
               <form onSubmit={addProduct}>
 
@@ -524,6 +730,48 @@ export default function ShopDashboard() {
                     onChange={(e) => setSize(e.target.value)}
                   />
                 </div>
+
+                {/* Category picker — only for new products */}
+                {!selectedProductId && name.trim().length > 1 && (() => {
+                  const catIcons: Record<string,string> = {
+  "Dairy, Bread & Eggs":"🥛","Fruits & Vegetables":"🥦","Snacks & Munchies":"🍿",
+  "Breakfast & Instant Food":"🥣","Sweet Tooth":"🍫","Bakery & Biscuits":"🍪",
+  "Tea, Coffee & Milk Drinks":"☕","Atta, Rice & Dal":"🌾","Masala, Oil & More":"🫙",
+  "Sauces & Spreads":"🥫","Cold Drinks & Juices":"🥤","Chicken, Meat & Fish":"🍗",
+  "Baby Care":"🍼","Pharma & Wellness":"💊","Cleaning Essentials":"🧹",
+  "Home & Office":"🏠","Personal Care":"🪥","Pet Care":"🐾",
+  "Paan Corner":"🌿","Organic & Healthy Living":"🥗"
+};
+                  const catList = categories.length > 0
+                    ? categories.map((c:any) => c.name)
+                    : Object.keys(catIcons);
+                  return (
+                    <div className="field">
+                      <label className="field-label">Category <span style={{color:"#F03D3D"}}>*</span></label>
+                      <div className="new-product-notice">
+                        🆕 New product — please select a category
+                      </div>
+                      <div className="cat-grid">
+                        {catList.map((cat: string) => (
+                          <button
+                            key={cat}
+                            type="button"
+                            className={`cat-option ${category === cat ? "selected" : ""}`}
+                            onClick={() => setCategory(cat)}
+                          >
+                            <span className="cat-option-icon">{catIcons[cat] ?? "🛍️"}</span>
+                            <span className="cat-option-name">{cat}</span>
+                          </button>
+                        ))}
+                      </div>
+                      {category && (
+                        <div style={{marginTop:8,fontSize:12,fontWeight:700,color:"#00875A"}}>
+                          ✅ Selected: {category}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Product Image Upload */}
                 <div className="field">
@@ -600,24 +848,72 @@ export default function ShopDashboard() {
                 <div className="empty-sub">{searchQuery ? "Try a different search" : "Add your first product above"}</div>
               </div>
             ) : (
-              filtered.map((p) => (
-                <div key={p.id} className="prod-card">
-                  <div className="prod-icon">
-                    {p.image_url
-                      ? <img src={p.image_url} alt={p.name} />
-                      : (p.stock ?? 0) < 5 ? "⚠️" : "🛍️"}
-                  </div>
-                  <div className="prod-info">
-                    <div className="prod-name">{p.name ?? "Unnamed"}</div>
-                    {p.size && <div style={{fontSize:"11px",color:"#8A96B5",fontWeight:600,marginBottom:3}}>{p.size}</div>}
-                    <div className="prod-meta">
-                      <span className="prod-price">₹{p.price}</span>
-                      <span className={`stock-badge ${(p.stock ?? 0) < 5 ? "stock-low" : "stock-ok"}`}>{p.stock ?? 0} in stock</span>
+              filtered.map((p) => {
+                const editVal = editStockMap[p.id] ?? String(p.stock ?? 0);
+                const delta = Number(editVal) - (p.stock ?? 0);
+                return (
+                  <div key={p.id} className="prod-card" style={{flexDirection:"column",alignItems:"stretch",gap:10}}>
+                    {/* Top row: image + info + delete */}
+                    <div style={{display:"flex",alignItems:"center",gap:12}}>
+                      <div className="prod-icon">
+                        {p.image_url
+                          ? <img src={p.image_url} alt={p.name} />
+                          : (p.stock ?? 0) < 5 ? "⚠️" : "🛍️"}
+                      </div>
+                      <div className="prod-info">
+                        <div className="prod-name">{p.name ?? "Unnamed"}</div>
+                        {p.size && <div style={{fontSize:"11px",color:"#8A96B5",fontWeight:600,marginBottom:3}}>{p.size}</div>}
+                        <div className="prod-meta">
+                          <span className="prod-price">₹{p.price}</span>
+                          <span className={`stock-badge ${(p.stock ?? 0) < 5 ? "stock-low" : "stock-ok"}`}>{p.stock ?? 0} in stock</span>
+                        </div>
+                      </div>
+                      <button className="del-btn" onClick={() => deleteProduct(p.id)}>🗑️</button>
+                    </div>
+                    {/* Stock controls */}
+                    <div>
+                      <div style={{fontSize:"10px",fontWeight:800,color:"#8A96B5",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:6}}>Update Stock</div>
+                      <div className="stock-ctrl-row">
+                        <button
+                          type="button"
+                          className="stock-ctrl-btn minus"
+                          onClick={() => {
+                            const cur = Number(editStockMap[p.id] ?? p.stock ?? 0);
+                            if (cur > 0) setEditStockMap((prev) => ({...prev, [p.id]: String(cur - 1)}));
+                          }}
+                        >−</button>
+                        <input
+                          className="stock-ctrl-input"
+                          type="number"
+                          min="0"
+                          value={editVal}
+                          onChange={(e) => setEditStockMap((prev) => ({...prev, [p.id]: e.target.value}))}
+                        />
+                        <button
+                          type="button"
+                          className="stock-ctrl-btn plus"
+                          onClick={() => {
+                            const cur = Number(editStockMap[p.id] ?? p.stock ?? 0);
+                            setEditStockMap((prev) => ({...prev, [p.id]: String(cur + 1)}));
+                          }}
+                        >+</button>
+                        <button
+                          type="button"
+                          className={`stock-save-btn ${savedStockMap[p.id] ? "saved" : ""}`}
+                          onClick={() => updateStockInline(p.id, Number(editVal))}
+                        >
+                          {savedStockMap[p.id] ? "✓ Saved" : "Save"}
+                        </button>
+                      </div>
+                      {editStockMap[p.id] !== undefined && delta !== 0 && (
+                        <div className="stock-delta-hint" style={{color: delta > 0 ? "#00875A" : "#F03D3D"}}>
+                          {delta > 0 ? `+${delta} will be added` : `${delta} will be removed`}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <button className="del-btn" onClick={() => deleteProduct(p.id)}>🗑️</button>
-                </div>
-              ))
+                );
+              })
             )}
           </>
         )}

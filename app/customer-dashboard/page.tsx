@@ -189,8 +189,9 @@ export default function CustomerDashboard() {
   const [fMaxPrice, setFMaxPrice] = useState("");
   const [fShop, setFShop] = useState("");
   const [fBrand, setFBrand] = useState("");
-  const [fInStock, setFInStock] = useState(false);
-  const [applied, setApplied] = useState({ minPrice:"", maxPrice:"", shop:"", brand:"", inStock:false });
+  const [fInStock, setFInStock] = useState(true);
+  const [fOrderType, setFOrderType] = useState(""); // "" | "pickup" | "delivery"
+  const [applied, setApplied] = useState({ minPrice:"", maxPrice:"", shop:"", brand:"", inStock:true, orderType:"" });
   const contentRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -218,14 +219,18 @@ export default function CustomerDashboard() {
 
     const { data: spData } = await supabase.from("shop_products").select("id, price, stock, product_id, shop_id, name, size").gt("stock", 0);
     const shopIds = [...new Set((spData||[]).map((r:any) => r.shop_id).filter(Boolean))];
+
+    // Only fetch LIVE shops
     const { data: shopData } = shopIds.length > 0
-      ? await supabase.from("profiles").select("id, name, latitude, longitude").in("id", shopIds)
+      ? await supabase.from("profiles").select("id, name, latitude, longitude, is_live, offers_delivery, offers_pickup").in("id", shopIds).eq("is_live", true)
       : { data: [] };
     const shopMap: any = {};
     (shopData||[]).forEach((s:any) => { shopMap[s.id] = s; });
 
     const spByProduct: Record<string, any[]> = {};
     (spData||[]).forEach((sp:any) => {
+      // Only include stock from live shops
+      if (!shopMap[sp.shop_id]) return;
       if (!spByProduct[sp.product_id]) spByProduct[sp.product_id] = [];
       spByProduct[sp.product_id].push(sp);
     });
@@ -253,6 +258,8 @@ export default function CustomerDashboard() {
         shop_name: bestSp?.shop?.name ?? "",
         distance: bestSp?.dist ?? 0,
         inStock: !!bestSp,
+        offersDelivery: bestSp?.shop?.offers_delivery ?? false,
+        offersPickup: bestSp?.shop?.offers_pickup ?? true,
       };
     });
 
@@ -284,7 +291,7 @@ export default function CustomerDashboard() {
   // Derived data
   const shops = [...new Set(products.map((p) => p.shop_name).filter(Boolean))];
   const brands = [...new Set(products.map((p) => p.brand).filter(Boolean))];
-  const activeFilterCount = [applied.shop, applied.brand, applied.minPrice||applied.maxPrice, applied.inStock?"y":""].filter(Boolean).length;
+  const activeFilterCount = [applied.shop, applied.brand, applied.minPrice||applied.maxPrice, applied.inStock?"y":"", applied.orderType].filter(Boolean).length;
 
   // Filter products
   function applyFilters(list: any[]) {
@@ -294,6 +301,8 @@ export default function CustomerDashboard() {
       if (applied.minPrice && p.inStock && p.price < Number(applied.minPrice)) return false;
       if (applied.maxPrice && p.inStock && p.price > Number(applied.maxPrice)) return false;
       if (applied.inStock && !p.inStock) return false;
+      if (applied.orderType === "delivery" && !p.offersDelivery) return false;
+      if (applied.orderType === "pickup" && !p.offersPickup) return false;
       return true;
     }).sort((a,b) => {
       if (a.inStock && !b.inStock) return -1;
@@ -417,6 +426,16 @@ export default function CustomerDashboard() {
         <button className={`sort-chip ${sortBy==="price_asc"?"active":""}`} onClick={() => setSortBy("price_asc")}>₹ Low–High</button>
         <button className={`sort-chip ${sortBy==="price_desc"?"active":""}`} onClick={() => setSortBy("price_desc")}>₹ High–Low</button>
         <button className={`sort-chip ${sortBy==="popularity"?"active":""}`} onClick={() => setSortBy("popularity")}>🔥 Popular</button>
+        <button className={`sort-chip ${applied.orderType==="delivery"?"active":""}`} onClick={() => {
+          const next = applied.orderType === "delivery" ? "" : "delivery";
+          setFOrderType(next);
+          setApplied((p) => ({...p, orderType: next}));
+        }}>🛵 Delivery</button>
+        <button className={`sort-chip ${applied.orderType==="pickup"?"active":""}`} onClick={() => {
+          const next = applied.orderType === "pickup" ? "" : "pickup";
+          setFOrderType(next);
+          setApplied((p) => ({...p, orderType: next}));
+        }}>🏪 Pickup</button>
         <button className={`sort-chip ${activeFilterCount>0?"active":""}`} onClick={() => setShowFilter(true)}>
           🎛 Filter{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
         </button>
@@ -569,8 +588,8 @@ export default function CustomerDashboard() {
             <div className="sheet-section">
               <div className="sheet-label">Availability</div>
               <div className="sheet-options">
-                <div className={`sheet-opt ${!fInStock?"active":""}`} onClick={() => setFInStock(false)}>All Products</div>
                 <div className={`sheet-opt ${fInStock?"active":""}`} onClick={() => setFInStock(true)}>✅ In Stock Only</div>
+                <div className={`sheet-opt ${!fInStock?"active":""}`} onClick={() => setFInStock(false)}>All Products</div>
               </div>
             </div>
             <div className="sheet-actions">
@@ -580,8 +599,17 @@ export default function CustomerDashboard() {
                 setShowFilter(false);
               }}>Clear All</button>
               <button className="btn-apply" onClick={() => {
-                setApplied({ shop:fShop, brand:fBrand, minPrice:fMinPrice, maxPrice:fMaxPrice, inStock:fInStock });
+                setApplied({ shop:fShop, brand:fBrand, minPrice:fMinPrice, maxPrice:fMaxPrice, inStock:fInStock, orderType:fOrderType });
                 setShowFilter(false);
+              {/* Order type filter */}
+              <div style={{marginBottom:18}}>
+                <div className="sheet-section-label">Order Type</div>
+                <div className="sheet-opts-row">
+                  <div className={`sheet-opt ${fOrderType===""?"active":""}`} onClick={() => setFOrderType("")}>All</div>
+                  <div className={`sheet-opt ${fOrderType==="delivery"?"active":""}`} onClick={() => setFOrderType("delivery")}>🛵 Delivery</div>
+                  <div className={`sheet-opt ${fOrderType==="pickup"?"active":""}`} onClick={() => setFOrderType("pickup")}>🏪 Pickup</div>
+                </div>
+              </div>
               }}>Apply Filters</button>
             </div>
           </div>
