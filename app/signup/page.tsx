@@ -31,6 +31,9 @@ export default function Signup() {
         name: fullName,
         email,
         role,
+        is_live: false,
+        offers_delivery: false,
+        offers_pickup: true,
       });
 
       if (profileError) { alert("Profile error: " + profileError.message); setLoading(false); return; }

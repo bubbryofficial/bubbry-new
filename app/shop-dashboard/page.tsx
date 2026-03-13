@@ -202,48 +202,89 @@ export default function ShopDashboard() {
   const suggestionDebounce = useRef<any>(null);
 
   useEffect(() => {
-    saveShopLocation();
-    fetchProducts();
     fetchCategories();
-    loadShopStatus();
+    let initialized = false;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // Only run once on initial session load, not on every token refresh
+      if (!initialized && session?.user) {
+        initialized = true;
+        loadShopStatus(session.user.id);
+        fetchProducts(session.user.id);
+        saveShopLocation(session.user.id);
+      }
+    });
+    // Also try getSession immediately in case onAuthStateChange already fired
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!initialized && session?.user) {
+        initialized = true;
+        loadShopStatus(session.user.id);
+        fetchProducts(session.user.id);
+        saveShopLocation(session.user.id);
+      }
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
-  async function loadShopStatus() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const { data } = await supabase
+  async function loadShopStatus(userId?: string) {
+    let uid = userId;
+    if (!uid) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+      uid = session.user.id;
+    }
+    const { data, error } = await supabase
       .from("profiles")
       .select("is_live, offers_delivery, offers_pickup")
-      .eq("id", user.id)
+      .eq("id", uid)
       .single();
+    if (error) { console.log("loadShopStatus error:", error.message); return; }
     if (data) {
-      setIsLive(data.is_live ?? false);
-      setOffersDelivery(data.offers_delivery ?? false);
-      setOffersPickup(data.offers_pickup ?? true);
+      setIsLive(data.is_live === true);
+      setOffersDelivery(data.offers_delivery === true);
+      setOffersPickup(data.offers_pickup === true || data.offers_pickup === null);
     }
   }
 
   async function toggleLive(val: boolean) {
     setTogglingLive(true);
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) { setTogglingLive(false); return; }
-    await supabase.from("profiles").update({ is_live: val }).eq("id", user.id);
-    setIsLive(val);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ is_live: val })
+      .eq("id", user.id);
+    if (error) {
+      alert("Failed to update live status: " + error.message);
+      setTogglingLive(false);
+      return;
+    }
+    // Read back to confirm write succeeded
+    const { data: check } = await supabase
+      .from("profiles")
+      .select("is_live")
+      .eq("id", user.id)
+      .single();
+    const confirmed = check?.is_live === true;
+    setIsLive(confirmed);
+    if (val && !confirmed) {
+      alert("Could not save live status — check your Supabase RLS policies for the profiles table.");
+    }
     setTogglingLive(false);
   }
 
   async function toggleDelivery(val: boolean) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await supabase.from("profiles").update({ offers_delivery: val }).eq("id", user.id);
-    setOffersDelivery(val);
+    const { error } = await supabase.from("profiles").update({ offers_delivery: val }).eq("id", user.id);
+    if (!error) setOffersDelivery(val);
   }
 
   async function togglePickup(val: boolean) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await supabase.from("profiles").update({ offers_pickup: val }).eq("id", user.id);
-    setOffersPickup(val);
+    const { error } = await supabase.from("profiles").update({ offers_pickup: val }).eq("id", user.id);
+    if (!error) setOffersPickup(val);
   }
 
   async function fetchCategories() {
@@ -392,18 +433,27 @@ export default function ShopDashboard() {
     return data.publicUrl;
   }
 
-  async function saveShopLocation() {
+  async function saveShopLocation(userId?: string) {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      await supabase.from("profiles").update({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }).eq("id", user.id);
+      let uid = userId;
+      if (!uid) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        uid = user.id;
+      }
+      await supabase.from("profiles").update({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }).eq("id", uid);
     });
   }
 
-  async function fetchProducts() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+  async function fetchProducts(userId?: string) {
+    let uid = userId;
+    if (!uid) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      uid = user.id;
+    }
+    const user = { id: uid };
     const { data: spData } = await supabase
       .from("shop_products")
       .select("id, price, stock, product_id, name, size")
